@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/llmp'
+
+begin
+  opts = Llmp::Cli.parse(ARGV)
+
+  unless opts[:pipe_path]
+    warn "Error: Pipe '#{opts[:pipe]}' not found"
+    exit 1
+  end
+
+  pipe = Llmp::Pipe.new(opts[:pipe_path], args: opts[:args])
+  input_data = $stdin.read
+
+  result = pipe.execute(input_data, force: opts[:force])
+  $stdout.write(result)
+rescue StandardError => e
+  warn "Error: #{e.message}"
+  warn e.backtrace.first(5) if ENV['LLMP_DEBUG']
+  exit 1
+end
